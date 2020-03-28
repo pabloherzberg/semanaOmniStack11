@@ -1,20 +1,30 @@
 const express = require('express')
+const routes = express.Router()
+//  CONTROLLERS
 const OngController = require('./controllers/OngController')
 const IncidentController = require('./controllers/IncidentController')
 const ProfileController = require('./controllers/ProfileController')
 const SessionController = require('./controllers/SessionController')
+//  MIDDLEWARES
+const incidentsMiddleware = require('./middleware/incidentsMiddleware')
+const ongMiddleware = require('./middleware/ongMiddleware')
+const profileMiddleware = require('./middleware/profileMiddleware')
 
-const routes = express.Router()
 
+//LOGIN
 routes.post('/session', SessionController.create)
 
+//ONGS
 routes.get('/ongs', OngController.index)
-routes.post('/ongs', OngController.create)
+routes.post('/ongs', ongMiddleware.withBody, OngController.create)
 
-routes.get('/incidents', IncidentController.index)
-routes.post('/incidents', IncidentController.create)
-routes.delete('/incidents/:id', IncidentController.delete)
+//INCIDENTS
+routes.get('/incidents', incidentsMiddleware.page , IncidentController.index)
+routes.post('/incidents', incidentsMiddleware.withAuthAndBody, IncidentController.create)
+routes.delete('/incidents/:id', incidentsMiddleware.withIncidentId, IncidentController.delete)
 
-routes.get('/profile', ProfileController.index)
+//PROFILE
+routes.get('/profile', profileMiddleware.withAth, ProfileController.index)
+
 
 module.exports = routes
